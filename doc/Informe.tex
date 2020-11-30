@@ -1,0 +1,90 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[pdftex]{hyperref}
+\usepackage{multirow}
+
+
+\hypersetup{colorlinks,%
+	citecolor=black,%
+	filecolor=black,%
+	linkcolor=black,%
+	urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+	\textbf{Proyecto de Simulación}\\
+	\textbf{Lógica Difusa}\\
+	\textbf{Curso: 2019-2020}\\
+\end{center}
+		
+\vspace{1.5cm}
+		
+Oscar Luis Hernández Solano \hspace{0.7cm}
+\href{mailto:o.hernandez2@estudiantes.matcom.uh.cu}{o.hernandez2@estudiantes.matcom.uh.cu}
+
+Grupo C411\\
+
+
+\section{Principales Ideas:}
+El objetivo del problema es lograr que el robot de casa no sea despedido y esto ocurre si la casa alcanza un nivel de suciedad superior al $60 \%$ o bien al finalizar los $100t$ turnos de simulación no se ha conseguido colocar a todos los niños en los corrales y limpiar completamente la casa. Para ello se implementaron diferentes modelos reactivos al estado de la habitación o ambiente en función de una serie de estados que determinan cuál será la siguiente acción a realizar por el robot de casa, (dígase por acción: recoger basura, llevar niño al corral, recoger niño, no hacer nada) y finalmente comprobar cual de los modelos ofrece mejores resultados.
+
+\section{Modelos de agentes:}
+
+\begin{enumerate}
+	\item[] \textbf{Modelo 1:} Este modelo reacciona al incremento del porciento de basura del ambiente, o sea, si en un momento $t$ de la simulación el porciento de basura existente en el ambiente se esta acercando al porcentaje crítico de suciedad($60\%$) el robot de casa pasa al estado de limpiar el exceso de basura en el ambiente en un intento desesperado por evitar ser despido. Si el porcentaje de suciedad se encuentra en niveles admisibles entonces el robot de casa si tiene a un niño cargado pasa al estado de llevar al niño en cuestión al corral más cercano, en caso contrario pasa al estado de buscar al niño más cercano a su posición. En caso de encontrarse con suciedad en el trayecto hacia el corral o el niño más cercano, el robot de casa limpia. En caso de no tener un camino posible hacia ningún corral vacío mientras carga a un niño o hacia ningún niño en caso contrario el robot de casa pasa al estado de limpiar la basura y en caso de no haber basura o no tener camino hacia ella, el robot de casa no realiza acción en ese turno.
+	
+	\item[] \textbf{Modelo 2:} Este modelo intenta explotar la capacidad de movimiento del robot de casa mientras tiene un niño cargado,  el cual es de dos pasos. Para ello una vez inicia la simulación el robot de casa pasa inmediatamente al estado de buscar el niño más cercano a su posición e ignora en cada turno el porcentaje de basura acumulada en la habitación hasta conseguir capturar a un niño. Una vez con un niño cargado el robot de casa puede moverse dos pasos en un turno lo que posibilita que pueda limpiar la acumulación de suciedad el doble de rápido, en este momento pasa al estado de limpiar basura hasta que el pocentaje de suciedad se encuentre por debajo del $10\%$. Una vez la habitación está casi limpia el robot de casa pasa al estado de llevar al niño que tiene cargado hacia el corral más cercano a su posición.
+	
+	\item[] \textbf{Modelo 3:} Este modelo combina las ideas propuestas en los modelos anteriores, el robot de casa reacciona a la acumulación de suciedad por encima del $40\%$ y pasa al estado de recoger el exceso de suciedad sin importar lo que hacia anteriormente. De la misma manera una vez que el robot de casa captura a un niño este pasará a limpiar hasta que el ambiente esté en un $10\%$ de suciedad y solo luego de ello pasará al estado de llevar al niño hacia el corral más cercano.
+\end{enumerate}
+
+
+\section{Principales ideas para la Implementación:}
+El ambiente se modela con una matriz de $N \times M$, en cada celda hay un máscara de bits que indica cuáles elementos interactúan en dicha celda. Para generar un tablero se selecciona una celda random y se colocan los corrales adyacentes entre sí, luego se colocan los obstáculos de manera aleatoria se comprueba que el resultado sea un tablero conexo usando $BFS$, y por útimo se colocan los niños y el robot de casa todo de manera aleatoria. El cambio de ambiente se logra generando un nuevo tablero $M'$ con las mismas propiedades que el anterior tablero $M$. 
+	
+
+\section{Resultados y Consideracines:}
+
+\begin{tabular}{ |l|r|r|r|r|r|r|r|r| }
+	\hline
+	N & M & Niños & \%Suciedad & \%Obstáculos & T & Modelo1 & Modelo2 & Modelo3 \\
+	\hline
+	4 & 4 & 3 & 20 & 10 & 10 & G:29 F:1 & G:30 F:0 & G:30 F:0\\
+	\hline
+	5 & 6 & 4 & 25 & 15 & 10 & G:30 F:0 & G:30 F:0 & G:30 F:0\\
+	\hline
+	6 & 6 & 5 & 20 & 30 & 10 & G:26 F:4 & G:27 F:3 & G:26 F:4\\
+	\hline
+	6 & 8 & 5 & 45 & 25 & 15 & G:28 F:2 & G:22 F:8 & G:29 F:1\\
+	\hline
+	7 & 5 & 6 & 30 & 25 & 20 & G:21 F:9 & G:14 F:16 & G:15 F:15\\
+	\hline
+	8 & 8 & 7 & 40 & 15 & 10 & G:14 F:16 & G:9 F:21 & G:26 F:4\\
+	\hline
+	8 & 10 & 8 & 35 & 25 & 20 & G:17 F:13 & G:5 F:25 & G:16 F:14\\
+	\hline
+	9 & 8 & 7 & 25 & 35 & 15 & G:20 F:10 & G:10 F:20 & G:17 F:13\\
+	\hline
+	9 & 9 & 7 & 40 & 20 & 10 & G:16 F:14 & G:14 F:16 & G:27 F:3\\
+	\hline
+	10 & 10 & 8 & 45 & 25 & 20 & G:14 F:16 & G:2 F:28 & G:16 F:14\\
+	\hline
+	
+\end{tabular}\\
+
+Como se puede apreciar en la tabla anterior el modelo 2 tiende a dar peores resultados que los restantes modelos esto es debido a que carece de reactividad a la acumulación de suciedad y pasa mucho tiempo limpiando cuando tiene cargado a un niño, sin embargo en tableros pequeños y más sencillos muestra un rendimiento superior. En el caso del modelo 1 se comporta de manera promedio aunque no supera al modelo número 3 que ofrece los mejores resultados en general por su carácter híbrido.
+ 
+		
+\end{document}
+	
+	
+
+	
+	
